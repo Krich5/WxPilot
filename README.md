@@ -232,4 +232,4 @@ Every call goes to `https://api.wxcc-{dc}.cisco.com/organization/{orgId}/...`:
 
 ## License
 
-Released under the [MIT License](LICENSE).
+See [LICENSE](LICENSE).
