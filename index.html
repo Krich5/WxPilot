@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WxPilot</title>
+<link rel="manifest" href="manifest.json">
+<script src="config.js"></script>
+<link rel="icon" type="image/png" sizes="512x512" href="assets/images/WxPilot_icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/images/WxPilot_icon-192.png">
+<link rel="apple-touch-icon" href="assets/images/WxPilot_apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WxPilot">
+<meta name="theme-color" content="#07101C">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --text: #F3F6FA;
+    --text-secondary: #A9B7CB;
+    --border: rgba(255, 255, 255, 0.14);
+    --card-bg: rgba(20, 27, 41, 0.58);
+    --field-bg: rgba(7, 16, 28, 0.55);
+    --field-border: rgba(255, 255, 255, 0.16);
+    --accent: #049FD9;
+    --accent-strong: #37B4E8;
+    --accent-wash: rgba(4, 159, 217, 0.16);
+    --danger: #F2887F;
+    --danger-bg: rgba(242, 136, 127, 0.12);
+    --danger-border: rgba(242, 136, 127, 0.32);
+    --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: #07101C url("assets/images/gradient-background-dark.svg") no-repeat center top / cover fixed;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, .mono { font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .brand-name {
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+  }
+  .brand img {
+    width: 28px; height: 28px;
+    flex: none;
+  }
+  #signOutBtn {
+    display: none;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  #signOutBtn:hover { border-color: var(--accent); color: var(--text); }
+
+  /* ---------- Login screen ---------- */
+  #loginScreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 64px);
+    padding: 24px;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 40px 36px 32px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    text-align: center;
+  }
+  .login-card .app-logo {
+    width: 220px;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto 18px;
+    display: block;
+  }
+  .login-card h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 28px;
+  }
+  .login-card p.dek {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin: 0 0 26px;
+  }
+  a#signInBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14.5px;
+    padding: 13px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  a#signInBtn:hover { background: var(--accent-strong); }
+  a#signInBtn img { width: 20px; height: 20px; flex: none; }
+  .error-box {
+    display: none;
+    margin-top: 16px;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    color: var(--danger);
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-align: left;
+  }
+
+  /* ---------- Widget screen ---------- */
+  #widgetScreen { display: none; min-height: calc(100vh - 64px); }
+  #widget-root { padding: 16px; overflow: hidden; }
+  global-variable-manager { display: block; min-height: 400px; transform-origin: top left; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand"><img src="assets/images/WxPilot_icon.png" alt=""><span class="brand-name">WxPilot</span></div>
+    <button id="signOutBtn" type="button">Sign out</button>
+  </div>
+
+  <div id="loginScreen">
+    <div class="login-card">
+      <img class="app-logo" src="assets/images/WxPilot.png" alt="WxPilot">
+      <h1>Sign in</h1>
+      <p class="dek">Sign in with your Webex account to load Supervisor Controls.</p>
+
+      <a id="signInBtn" href="#">
+        <img src="assets/images/webex-logo.png" alt="">
+        Sign in with Webex
+      </a>
+      <div class="error-box" id="errorBox"></div>
+    </div>
+  </div>
+
+  <div id="widgetScreen">
+    <div id="widget-root"></div>
+  </div>
+
+  <script>
+    // WxPilot's own session keys. Prefixed so it never shares a sign-in with
+    // other apps on the same origin (e.g. krich5.github.io/Orbit).
+    const STORAGE_KEY_TOKEN = 'wxpilot.token';
+    const STORAGE_KEY_ORGID = 'wxpilot.orgId';
+    const STORAGE_KEY_EXPIRES = 'wxpilot.expiresAt';
+    const STATE_KEY = 'wxpilot.oauthState';
+    const WIDGET_SCRIPT_URL = 'controls.js';
+    const DATA_CENTER = window.WXPILOT_DATA_CENTER || 'us1';
+
+    const loginScreen = document.getElementById('loginScreen');
+    const widgetScreen = document.getElementById('widgetScreen');
+    const widgetRoot = document.getElementById('widget-root');
+    const errorBox = document.getElementById('errorBox');
+    const signOutBtn = document.getElementById('signOutBtn');
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = 'block';
+    }
+    function clearError() {
+      errorBox.style.display = 'none';
+      errorBox.textContent = '';
+    }
+
+    // Webex identity APIs (webexapis.com) return orgId as a base64-encoded
+    // URN like "ciscospark://us/ORGANIZATION/<uuid>" — Cisco's "Common
+    // Identity" format. The WxCC config API needs the plain trailing UUID,
+    // not the encoded URN, or every call 403s.
+    function extractOrgUuid(rawOrgId) {
+      const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+      // Already a plain UUID — nothing to decode.
+      if (uuidPattern.test(rawOrgId) && !rawOrgId.includes('/')) {
+        return rawOrgId;
+      }
+
+      try {
+        let b64 = rawOrgId.replace(/-/g, '+').replace(/_/g, '/');
+        b64 += '='.repeat((4 - (b64.length % 4)) % 4);
+        const decoded = atob(b64);
+        const match = decoded.match(uuidPattern);
+        if (match) return match[0];
+      } catch (e) {
+        // fall through
+      }
+
+      return rawOrgId;
+    }
+
+    // The widget has a fixed-width internal layout (a 7-column day grid,
+    // fixed-width dropdowns, etc.) that overflows narrow screens. We can't
+    // edit SupervisorControls.js, but its Shadow DOM is mode:"open", so we
+    // can measure its true content size from out here and scale the whole
+    // element down to fit — same trick as scaling a screenshot, not a
+    // responsive redesign.
+    function setupResponsiveScale(el) {
+      const wrapper = document.getElementById('widget-root');
+
+      function applyScale() {
+        const shadow = el.shadowRoot;
+        if (!shadow) return;
+        const content = shadow.querySelector('.container');
+        if (!content) return;
+
+        // Reset first so we measure the shadow content's own overflow, not
+        // a previous scale pass. Do NOT force the host to some large fixed
+        // width to "measure natural size" — the widget's grids use `fr`
+        // tracks, which flex-fill whatever space they're given rather than
+        // reporting an intrinsic size, so forcing extra width just produces
+        // a wrong (too large) reading. scrollWidth at the real, current
+        // (narrow) width correctly reflects the minmax()-driven overflow.
+        el.style.transform = '';
+        el.style.width = '';
+
+        const naturalWidth = content.scrollWidth;
+        const naturalHeight = content.scrollHeight;
+        const available = wrapper.clientWidth;
+
+        if (!naturalWidth || !naturalHeight || !available) {
+          wrapper.style.height = '';
+          return;
+        }
+
+        const scale = Math.min(1, available / naturalWidth);
+        if (scale < 0.999) {
+          el.style.transform = 'scale(' + scale + ')';
+          el.style.width = (100 / scale) + '%';
+          wrapper.style.height = (naturalHeight * scale) + 'px';
+        } else {
+          wrapper.style.height = '';
+        }
+      }
+
+      // Not requestAnimationFrame — it never fires for a tab that isn't
+      // actively compositing, which drops this silently in some embedding
+      // contexts. A plain debounce is simpler and just as effective here.
+      let debounceTimer = null;
+      const debouncedApply = () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(applyScale, 80);
+      };
+
+      window.addEventListener('resize', debouncedApply);
+      window.addEventListener('orientationchange', debouncedApply);
+
+      if (window.ResizeObserver) {
+        const shadow = el.shadowRoot;
+        const watchTarget = shadow && shadow.querySelector('.container');
+        if (watchTarget) {
+          new ResizeObserver(debouncedApply).observe(watchTarget);
+        }
+      }
+
+      // The widget re-renders by replacing #variablesContainer's innerHTML
+      // every time its data finishes loading or something is edited — that
+      // is a far more reliable trigger than guessing how long API calls
+      // will take with fixed timeouts.
+      if (window.MutationObserver && el.shadowRoot) {
+        new MutationObserver(debouncedApply).observe(el.shadowRoot, {
+          childList: true,
+          subtree: true
+        });
+      }
+
+      // Still keep a few fallback passes in case neither observer fires
+      // (e.g. the very first synchronous render before mutation observers
+      // are attached).
+      applyScale();
+      setTimeout(applyScale, 500);
+      setTimeout(applyScale, 1500);
+      setTimeout(applyScale, 3000);
+      setTimeout(applyScale, 6000);
+    }
+
+    function mountWidget(token, orgId) {
+      loginScreen.style.display = 'none';
+      widgetScreen.style.display = 'block';
+      signOutBtn.style.display = 'inline-block';
+
+      const create = () => {
+        widgetRoot.innerHTML = '';
+        const el = document.createElement('global-variable-manager');
+        el.setAttribute('token', token);
+        el.setAttribute('org-id', orgId);
+        el.setAttribute('data-center', DATA_CENTER);
+        widgetRoot.appendChild(el);
+        setupResponsiveScale(el);
+      };
+
+      if (customElements.get('global-variable-manager')) {
+        create();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = WIDGET_SCRIPT_URL;
+      script.onload = create;
+      script.onerror = () => showError('Could not load the Supervisor Controls script. Check your connection and try again.');
+      document.head.appendChild(script);
+    }
+
+    const LOCALSTORAGE_KEYS = [
+      STORAGE_KEY_TOKEN,
+      STORAGE_KEY_ORGID,
+      STORAGE_KEY_EXPIRES,
+      'wxpilot.userName'
+    ];
+
+    function clearSupervisorAuth() {
+      LOCALSTORAGE_KEYS.forEach(key => localStorage.removeItem(key));
+    }
+
+    // Local sign-out: forgets the token on this device and shows the sign-in
+    // screen. The token itself stays valid at Webex until it expires.
+    function handleSignOut() {
+      clearSupervisorAuth();
+      window.location.href = './';
+    }
+
+    function startSignIn(e) {
+      e.preventDefault();
+      clearError();
+      if (!window.WXPILOT_CLIENT_ID || String(window.WXPILOT_CLIENT_ID).includes('REPLACE') ||
+          !window.WXPILOT_PROXY_BASE || String(window.WXPILOT_PROXY_BASE).includes('REPLACE')) {
+        showError('WxPilot is not configured yet. Set the Client ID and proxy URL in config.js.');
+        return;
+      }
+      const state = Date.now() + '-' + Math.random().toString(36).slice(2);
+      sessionStorage.setItem(STATE_KEY, state);
+      const params = new URLSearchParams({
+        client_id: window.WXPILOT_CLIENT_ID,
+        response_type: 'code',
+        redirect_uri: window.WXPILOT_REDIRECT_URI,
+        scope: window.WXPILOT_OAUTH_SCOPES,
+        state
+      });
+      window.location.href = 'https://webexapis.com/v1/authorize?' + params.toString();
+    }
+
+    document.getElementById('signInBtn').addEventListener('click', startSignIn);
+    signOutBtn.addEventListener('click', handleSignOut);
+
+    // Restore a saved session, or stay on the sign-in screen.
+    (function loadSession() {
+      const token = localStorage.getItem(STORAGE_KEY_TOKEN);
+      const rawOrgId = localStorage.getItem(STORAGE_KEY_ORGID);
+      const expiresAt = parseInt(localStorage.getItem(STORAGE_KEY_EXPIRES) || '0', 10);
+
+      const urlError = new URLSearchParams(window.location.search).get('error');
+      if (urlError) showError(urlError);
+      if (!token || !rawOrgId) return;
+
+      if (expiresAt && Date.now() > expiresAt) {
+        clearSupervisorAuth();
+        showError('Your session expired. Please sign in again.');
+        return;
+      }
+
+      mountWidget(token, extractOrgUuid(rawOrgId));
+    })();
+  </script>
+
+</body>
+</html>

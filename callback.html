@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Signing in… | WxPilot</title>
+<link rel="icon" type="image/png" sizes="192x192" href="assets/images/WxPilot_icon-192.png">
+<meta name="theme-color" content="#07101C">
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #07101C url("assets/images/gradient-background-dark.svg") no-repeat center top / cover fixed;
+    color: #F3F6FA;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+  }
+  main { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0 24px; }
+  main img { width: 200px; max-width: 70vw; height: auto; }
+  p { text-align: center; margin: 0; }
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+  <main>
+    <img src="assets/images/WxPilot.png" alt="WxPilot">
+    <p id="status">Completing sign-in…</p>
+  </main>
+  <script>
+    (function () {
+      // Keys are prefixed so WxPilot never shares a session with other apps
+      // hosted on the same origin (e.g. krich5.github.io/Orbit).
+      const STATE_KEY = 'wxpilot.oauthState';
+      const statusEl = document.getElementById('status');
+
+      function fail(message, detail) {
+        statusEl.textContent = message;
+        if (detail) console.error(detail);
+        setTimeout(() => {
+          window.location.href = './?error=' + encodeURIComponent(message);
+        }, 2500);
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const error = params.get('error');
+      const code = params.get('code');
+      const state = params.get('state');
+      const expectedState = sessionStorage.getItem(STATE_KEY);
+      sessionStorage.removeItem(STATE_KEY);
+
+      if (error) return fail('Webex sign-in was cancelled or failed (' + error + ').');
+      if (!code) return fail('No authorization code was returned.');
+      if (!expectedState || state !== expectedState) return fail('Sign-in state mismatch — please try again.');
+
+      fetch(window.WXPILOT_PROXY_BASE + '/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      })
+        .then(res => res.json().then(data => ({ ok: res.ok, data })))
+        .then(({ ok, data }) => {
+          if (!ok || !data.access_token) throw new Error(data.error || data.message || 'Token exchange failed');
+          const token = data.access_token;
+          // The token response has no org — ask Webex who this user is.
+          return fetch('https://webexapis.com/v1/people/me', {
+            headers: { Authorization: 'Bearer ' + token }
+          })
+            .then(res => {
+              if (!res.ok) throw new Error('Could not look up your Webex account (' + res.status + ')');
+              return res.json();
+            })
+            .then(me => {
+              const expiresIn = Number(data.expires_in);
+              localStorage.setItem('wxpilot.token', token);
+              localStorage.setItem('wxpilot.orgId', me.orgId || '');
+              localStorage.setItem('wxpilot.userName', me.displayName || (me.emails && me.emails[0]) || '');
+              localStorage.setItem('wxpilot.expiresAt', expiresIn ? String(Date.now() + expiresIn * 1000) : '');
+            });
+        })
+        .then(() => { window.location.replace('./'); })
+        .catch(err => fail('Could not complete sign-in. ' + (err.message || ''), err));
+    })();
+  </script>
+</body>
+</html>

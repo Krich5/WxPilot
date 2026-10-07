@@ -1,0 +1,37 @@
+{
+  "name": "WxPilot",
+  "short_name": "WxPilot",
+  "description": "Business Hours, Overrides, Holiday Lists, and Global Variables for Webex Contact Center supervisors.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07101C",
+  "theme_color": "#07101C",
+  "icons": [
+    {
+      "src": "assets/images/WxPilot_icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/WxPilot_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/WxPilot_icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/images/WxPilot_icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

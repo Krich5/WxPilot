@@ -1,0 +1,16 @@
+{
+  "name": "wxpilot-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Holds WxPilot's Webex Integration secret and exchanges sign-in codes for tokens. Deployed to Railway.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
