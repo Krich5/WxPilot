@@ -14,7 +14,6 @@ WxPilot runs in two places, using the same widget:
 1. **Standalone web page / mobile app.** It signs in with Webex and works on a phone. Supervisors can add it to their home screen and use it like an app.
 2. **Agent Desktop tab.** It adds a **WxPilot** page to the Supervisor Desktop navigation.
 
-<!-- Optional: add screenshots, e.g. ![WxPilot on mobile](screenshot-mobile.png) -->
 
 ## What supervisors can do
 
